@@ -1,2 +1,2 @@
 # TomcatWeakPasswordDetectionTool
-Tomcat 弱密码检测工具
+* Tomcat 弱密码检测工具
