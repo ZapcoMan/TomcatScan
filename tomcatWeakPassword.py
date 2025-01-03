@@ -3,14 +3,20 @@
 # @Author  : codervibe
 # @File    : tomcatWeakPassword.py
 # @Project : TomcatWeakPasswordDetectionTool
-
 import requests
 from requests.auth import HTTPBasicAuth
-
+import random
 
 class TomcatWeakPasswordDetector:
     def __init__(self, base_url):
         self.base_url = base_url
+        self.user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.140 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.140 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"
+        ]
         self.headers = {
             "Cache-Control": "max-age=0",
             "sec-ch-ua": '"Chromium";v="131", "Not_A Brand";v="24"',
@@ -18,7 +24,6 @@ class TomcatWeakPasswordDetector:
             "sec-ch-ua-platform": '"Windows"',
             "Accept-Language": "zh-CN,zh;q=0.9",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.140 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-Mode": "navigate",
@@ -29,12 +34,12 @@ class TomcatWeakPasswordDetector:
         }
 
     def check_weak_password(self, username, password):
+        self.headers["User-Agent"] = random.choice(self.user_agents)
         auth = HTTPBasicAuth(username=username, password=password)
         try:
             response = requests.get(self.base_url, headers=self.headers, auth=auth)
-            # print("Response Status Code:", response.status_code)
-            # print("Response Content:", response.text)
             return response.status_code == 200
         except requests.exceptions.RequestException as e:
             print("HTTP Request failed:", e)
             return False
+
