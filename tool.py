@@ -14,7 +14,7 @@ from tomcatWeakPassword import TomcatWeakPasswordDetector
 
 # 内置的用户名和密码列表
 default_username_list = ["user", "test", "admin", "tom", "keep"]
-default_password_list = ["admin", "password", "123456"]
+default_password_list = ["admin", "password", "123456","123123","asdfg","asdfghjkl"]
 
 # 创建ArgumentParser对象
 parser = argparse.ArgumentParser(description="Tomcat弱密码检测工具")

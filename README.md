@@ -61,6 +61,6 @@ python tool.py -url http://example.com:8080/manager/html -username_file username
 - 自定义的用户名和密码字典文件应为纯文本文件，每行一个用户名或密码。
 - 使用此工具时，请遵守相关法律法规，仅在授权的情况下进行测试。
 
-## 联系方式
 
-如需帮助或有任何问题，请联系作者：codervibe
+如需帮助或有任何问题，请联系作者：codervibe## 联系方式
+
