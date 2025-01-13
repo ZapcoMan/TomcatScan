@@ -3,6 +3,14 @@
 # @Author  : codervibe
 # @File    : AjpForwardRequest.py
 # @Project : TomcatScan
+import struct
+from io import BytesIO as StringIO
+
+import AjpForwardRequest
+import AjpResponse
+from TomcatScan import pack_string, unpack, unpack_string
+
+
 class AjpForwardRequest:
     """
     AJP Forward 请求类。
