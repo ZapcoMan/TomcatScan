@@ -148,3 +148,4 @@ python logging.basicConfig(level=logging.DEBUG, format='%(message)s'
 5. 使用随机生成的文件名增加脚本的灵活和隐蔽性
 6. 自定义webshell默认Godzilla马，连接密码pass 加密密钥 xc
 7. 动态调整线程池大小:根据用户名和密码的组合队列计算调整线程池大小
+8. 使用的 tomcat版本为apache-tomcat-8.5.31 哥斯拉是最新版 [godzilla：https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla](https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla)
