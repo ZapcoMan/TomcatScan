@@ -34,15 +34,17 @@
 项目目录结构如下：
 
 ~~~
-E:\python\Python_project\TomcatScan 
-├── AjpBodyRequest.py 
-├── AjpForwardRequest.py 
-├── AjpResponse.py 
-├── NotFoundException.py 
-├── README.md 
-├── Tomcat.py 
-└── TomcatScan.py 
-└── config.yaml
+E:\python\Python_project\TomcatScan\
+├── tomcatscan\
+│   ├── __init__.py
+│   ├── ajp_body_request.py
+│   ├── ajp_forward_request.py
+│   ├── ajp_response.py
+│   ├── not_found_exception.py
+│   ├── tomcat.py
+├── config.yaml
+└── TomcatScan.py
+
 ~~~
 
 每个文件的主要功能如下：

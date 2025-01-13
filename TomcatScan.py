@@ -21,8 +21,7 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Style
 from requests.auth import HTTPBasicAuth
 
-import AjpForwardRequest
-import Tomcat
+from tomcatscan import Tomcat, AjpForwardRequest
 
 # 忽略HTTPS请求中的不安全请求警告
 requests.packages.urllib3.disable_warnings()
