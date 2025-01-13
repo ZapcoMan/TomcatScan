@@ -146,5 +146,5 @@ python logging.basicConfig(level=logging.DEBUG, format='%(message)s'
 3. 在上传成功或失败后删除WAR文件与JSP文件，磁盘空间浪费
 4. 增加上传失败时重试机制(默认3次)，避免网络问题或服务器偶尔响应慢可能会导致上传失败问题
 5. 使用随机生成的文件名增加脚本的灵活和隐蔽性
-6. 自定义webshell默认Godzilla马，连接密码pass
+6. 自定义webshell默认Godzilla马，连接密码pass 加密密钥 xc
 7. 动态调整线程池大小:根据用户名和密码的组合队列计算调整线程池大小
