@@ -37,14 +37,19 @@
 
 ~~~
 E:\python\Python_project\TomcatScan\
-├── tomcatscan\
-│   ├── __init__.py
-│   ├── ajp_body_request.py
-│   ├── ajp_forward_request.py
-│   ├── ajp_response.py
-│   ├── not_found_exception.py
-│   ├── tomcat.py
+├── common\
+│   └── common.py
 ├── config.yaml
+├── README.md
+├── Tomcat\
+│   ├── constants.py
+│   └── Tomcat.py
+├── tomcatscan\
+│   ├── AjpBodyRequest.py
+│   ├── AjpForwardRequest.py
+│   ├── AjpResponse.py
+│   ├── NotFoundException.py
+│   └── __init__.py
 └── TomcatScan.py
 
 ~~~
