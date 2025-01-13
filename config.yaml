@@ -1,0 +1,21 @@
+# 线程池配置
+thread_pool:
+  max_workers_limit: 500           # 最大线程数限制
+  min_workers: 100                 # 最小线程数
+  combination_per_thread: 40       # 设置每多少个组合分配一个线程
+
+# 重试配置
+retry:
+  check_weak_password:
+    max_retries: 3                 # URL无法访问的最大重试次数
+    retry_delay: 2                 # 每次重试前的延迟时间（秒）
+
+  deploy_godzilla_war:
+    max_retries: 3                 # 文件上传的最大重试次数
+    retry_delay: 2                 # 每次重试前的延迟时间（秒）
+
+# CNVD-2020-10487 漏洞配置
+cnvd_2020_10487:
+  port: 8009                       # AJP端口
+  file_path: "WEB-INF/web.xml"     # 要读取的文件路径
+  lfi_check: "Welcome to Tomcat"   # 用户自定义的判断条件，表示文件包含成功时内容的特征字符串
