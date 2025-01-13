@@ -5,7 +5,7 @@
 # @Project : TomcatScan
 import struct
 
-import AjpResponse
+from . import AjpResponse
 
 
 class AjpBodyRequest:

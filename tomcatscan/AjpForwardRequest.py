@@ -1,3 +1,4 @@
+# AjpForwardRequest.py
 # -*- coding: utf-8 -*-
 # @Time    : 13 1月 2025 11:54 下午
 # @Author  : codervibe
@@ -6,9 +7,9 @@
 import struct
 from io import BytesIO as StringIO
 
-import AjpForwardRequest
-import AjpResponse
-from TomcatScan import pack_string, unpack, unpack_string
+from common.common import pack_string, unpack, unpack_string
+from . import AjpResponse
+
 
 
 class AjpForwardRequest:

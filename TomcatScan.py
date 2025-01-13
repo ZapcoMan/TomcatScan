@@ -9,7 +9,6 @@ import os
 import random
 import re
 import string
-import struct
 import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,7 +20,9 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Style
 from requests.auth import HTTPBasicAuth
 
-from tomcatscan import Tomcat, AjpForwardRequest
+from Tomcat import Tomcat
+
+# from tomcatscan import Tomcat, AjpForwardRequest
 
 # 忽略HTTPS请求中的不安全请求警告
 requests.packages.urllib3.disable_warnings()
@@ -353,114 +354,6 @@ def validate_config(config):
                 return False
 
     return True
-
-
-def pack_string(s):
-    """
-    打包字符串，添加长度信息。
-
-    参数:
-        s (str): 输入字符串
-
-    返回:
-        bytes: 打包后的字节数据
-    """
-    if s is None:
-        return struct.pack(">h", -1)
-    l = len(s)
-    return struct.pack(">H%dsb" % l, l, s.encode('utf8'), 0)
-
-
-def unpack(stream, fmt):
-    """
-    解包字节流。
-
-    参数:
-        stream (io.BytesIO): 字节流
-        fmt (str): 解包格式
-
-    返回:
-        tuple: 解包后的数据
-    """
-    size = struct.calcsize(fmt)
-    buf = stream.read(size)
-    return struct.unpack(fmt, buf)
-
-
-def unpack_string(stream):
-    """
-    解包字符串。
-
-    参数:
-        stream (io.BytesIO): 字节流
-
-    返回:
-        str: 解包后的字符串
-    """
-    size, = unpack(stream, ">h")
-    if size == -1:  # null string
-        return None
-    res, = unpack(stream, "%ds" % size)
-    stream.read(1)  # \0
-    return res
-
-
-def prepare_ajp_forward_request(target_host, req_uri, method=AjpForwardRequest.GET):
-    """
-    准备AJP Forward请求。
-
-    参数:
-        target_host: 目标主机
-        req_uri: 请求URI
-        method: 请求方法，默认为GET
-    返回:
-        AjpForwardRequest: 准备好的请求对象
-    """
-    # 创建一个AJP Forward请求对象，用于从服务器到容器的通信
-    fr = AjpForwardRequest(AjpForwardRequest.SERVER_TO_CONTAINER)
-
-    # 设置请求的方法，如GET、POST等
-    fr.method = method
-
-    # 设置请求使用的协议版本
-    fr.protocol = "HTTP/1.1"
-
-    # 设置请求的统一资源标识符
-    fr.req_uri = req_uri
-
-    # 设置目标主机的地址，即请求发送到的地址
-    fr.remote_addr = target_host
-
-    # 设置目标主机的主机名，这里选择不设置
-    fr.remote_host = None
-
-    # 设置服务器的名称，即请求的目标服务器
-    fr.server_name = target_host
-
-    # 设置服务器的端口号，默认为80
-    fr.server_port = 80
-
-    # 初始化请求头字典，用于设置HTTP请求的各种头部信息
-    fr.request_headers = {
-        'SC_REQ_ACCEPT': 'text/html',
-        'SC_REQ_CONNECTION': 'keep-alive',
-        'SC_REQ_CONTENT_LENGTH': '0',
-        'SC_REQ_HOST': target_host,
-        'SC_REQ_USER_AGENT': 'Mozilla',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Upgrade-Insecure-Requests': '1',
-        'Cache-Control': 'max-age=0'
-    }
-
-    # 设置请求是否通过SSL进行传输
-    fr.is_ssl = False
-
-    # 初始化请求的属性列表，用于携带额外的请求信息
-    fr.attributes = []
-
-    # 返回配置好的AJP Forward请求对象
-    return fr
 
 
 # CVE-2017-12615与CNVD_2020_10487漏洞检测函数

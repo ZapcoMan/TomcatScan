@@ -4,8 +4,8 @@
 # @File    : AjpResponse.py
 # @Project : TomcatScan
 
-import AjpResponse
-from TomcatScan import unpack, unpack_string
+from . import AjpResponse
+from common.common import unpack, unpack_string
 
 
 class AjpResponse:
