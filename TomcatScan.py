@@ -519,10 +519,10 @@ def main():
         if not proxies:
             logger.error("配置文件中未找到代理设置。")
             return
-        logger.info(f"{Fore.GREEN}使用代理: {proxies}")
+        logger.info(f"{Fore.GREEN}[+] 使用代理: {proxies}")
     else:
         proxies = None
-        logger.info(f"{Fore.GREEN}不使用代理")
+        logger.info(f"{Fore.RED}[-] 不使用代理")
 
     # 加载 URL、用户名和密码文件
     urls = load_file(config['files']['url_file'])
