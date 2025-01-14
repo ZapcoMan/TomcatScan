@@ -11,8 +11,8 @@ retry:
     retry_delay: 2                 # 每次重试前的延迟时间（秒）
 
   deploy_godzilla_war:
-    max_retries: 3                 # 文件上传的最大重试次数
-    retry_delay: 2                 # 每次重试前的延迟时间（秒）
+    max_retries: 10                 # 文件上传的最大重试次数
+    retry_delay: 5                 # 每次重试前的延迟时间（秒）
 
 # CNVD-2020-10487 漏洞配置
 cnvd_2020_10487:

