@@ -4,8 +4,8 @@
 # @File    : Tomcat.py
 # @Project : TomcatScan
 import socket
-from Tomcat.constants import prepare_ajp_forward_request
-from tomcatscan.AjpForwardRequest import AjpForwardRequest
+from model.Tomcat.constants import prepare_ajp_forward_request
+from model.AjpForwardRequest import AjpForwardRequest
 
 class Tomcat:
     """

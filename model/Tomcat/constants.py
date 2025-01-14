@@ -23,7 +23,7 @@ def prepare_ajp_forward_request(target_host, req_uri, method=None):
         AjpForwardRequest: 准备好的请求对象
     """
     # 绝对导入 AjpForwardRequest 模块
-    from tomcatscan.AjpForwardRequest import GET, AjpForwardRequest
+    from model.AjpForwardRequest import GET, AjpForwardRequest
 
     if method is None:
         method = GET
