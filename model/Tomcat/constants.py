@@ -29,8 +29,9 @@ def prepare_ajp_forward_request(target_host, req_uri, method=None):
         method = GET
 
     # 创建一个AJP Forward请求对象，用于从服务器到容器的通信
-    fr = AjpForwardRequest(AjpForwardRequest.SERVER_TO_CONTAINER)
-
+    # fr = AjpForwardRequest(AjpForwardRequest.SERVER_TO_CONTAINER)
+    # 创建一个AJP Forward请求对象，用于从服务器到容器的通信
+    fr = AjpForwardRequest(SERVER_TO_CONTAINER)
     # 设置请求的方法，如GET、POST等
     fr.method = method
 

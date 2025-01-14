@@ -6,6 +6,8 @@
 import socket
 from model.Tomcat.constants import prepare_ajp_forward_request
 from model.AjpForwardRequest import AjpForwardRequest
+from model.AjpForwardRequest import REQUEST_METHODS, AjpForwardRequest
+
 
 class Tomcat:
     """
@@ -52,11 +54,19 @@ class Tomcat:
         - data_res: 响应数据对象列表。
         """
         self.req_uri = req_uri
-        # 准备AJP请求
+        # # 准备AJP请求
+                # ...此处为省略代码...
+        # # 准备AJP请求
+        # self.forward_request = prepare_ajp_forward_request(self.target_host, self.req_uri,
+        #                                                    method=AjpForwardRequest.REQUEST_METHODS.get(method))
+
         self.forward_request = prepare_ajp_forward_request(self.target_host, self.req_uri,
-                                                           method=AjpForwardRequest.REQUEST_METHODS.get(method))
+                                                           method=REQUEST_METHODS.get(method))
+
         # 设置认证信息
         if user is not None and password is not None:
+        # ...此处为省略代码...
+
             self.forward_request.request_headers['SC_REQ_AUTHORIZATION'] = "Basic " + (
                     "%s:%s" % (user, password)).encode('base64').replace('\n', '')
         # 设置请求头
