@@ -4,6 +4,7 @@
 # @File    : common.py
 # @Project : TomcatScan
 import random
+import secrets
 import struct
 
 
@@ -75,4 +76,4 @@ def getRandomUserAgent():
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
     ]
-    return random.choice(user_agents)
+    return secrets.choice(user_agents)

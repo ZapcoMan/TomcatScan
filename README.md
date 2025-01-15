@@ -132,15 +132,18 @@ A: 可以通过调整 `config.yaml` 中的 `thread_pool` 和 `retry` 配置来�
 ### Q: 如何调试日志？
 
 A: 日志级别默认为 `INFO`，可以在 `TomcatScan.py` 中调整 `logging.basicConfig` 的 `level` 参数来控制日志级别。例如：
+~~~python
+logging.basicConfig(level=logging.DEBUG, format='%(messages')
+~~~
 
-~~~
-python logging.basicConfig(level=logging.DEBUG, format='%(message)s'
-~~~
-# 支持漏洞:
+## 支持漏洞:
 1. CNVD-2020-10487(AJP协议本地文件包含)漏洞检测，支持灵活配置目标文件路径与判断条件。
 2. CVE-2017-12615文件上传漏洞的不同利用方式的检测
 3. 弱口令爆破成功后自动配置war进行getshell
-# 其他功能:
+
+---
+
+## 其他功能:
 1. 引入配置文件，使得调整参数更加灵活
 2. 增加处理登录时无法访问URL的情况，并在重试次数达到顶点时(默认3次)将URL从待检测列表中排除
 3. 在上传成功或失败后删除WAR文件与JSP文件，磁盘空间浪费
@@ -149,3 +152,4 @@ python logging.basicConfig(level=logging.DEBUG, format='%(message)s'
 6. 自定义webshell默认Godzilla马，连接密码pass 加密密钥 xc
 7. 动态调整线程池大小:根据用户名和密码的组合队列计算调整线程池大小
 8. 使用的 tomcat版本为apache-tomcat-8.5.31 哥斯拉是最新版 [godzilla：https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla](https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla)
+9. 项目中的字典过于简单 各位可以自行配置

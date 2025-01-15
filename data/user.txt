@@ -1,5 +1,11 @@
 admin
 tomcat
+manager
+role1
 root
-administrator
-system
+both
+j2deployer
+j2deployer
+ovwebusr
+owaspbwa
+kdsxc
