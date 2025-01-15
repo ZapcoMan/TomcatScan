@@ -10,7 +10,7 @@
 6. [配置文件](#配置文件)
 7. [常见问题](#常见问题)
 8. [支持漏洞](#支持漏洞)
-9. [其他功能](#其他功能)
+9. [其他功能 and 作者语](#其他功能 and 作者语)
 
 ---
 
@@ -30,7 +30,6 @@
 ~~~
 
 依赖库包括 `requests`, `yaml`, `bs4` 等。
-
 ## 代码结构
 
 项目目录结构如下：
@@ -41,28 +40,30 @@ E:\python\Python_project\TomcatScan\
 │   └── common.py
 ├── config.yaml
 ├── README.md
+├── model\
 ├── Tomcat\
 │   ├── constants.py
 │   └── Tomcat.py
-├── tomcatscan\
-│   ├── AjpBodyRequest.py
-│   ├── AjpForwardRequest.py
-│   ├── AjpResponse.py
-│   ├── NotFoundException.py
-│   └── __init__.py
+├── AjpBodyRequest.py
+├── AjpForwardRequest.py
+├── AjpResponse.py
+└── NotFoundException.py
 └── TomcatScan.py
-
 ~~~
 
 每个文件的主要功能如下：
 
-- **AjpBodyRequest.py**: 处理 AJP Body 请求的序列化和发送。
-- **AjpForwardRequest.py**: 处理 AJP Forward 请求的创建、序列化和解析。
-- **AjpResponse.py**: 解析 AJP 响应数据。
-- **NotFoundException.py**: 自定义异常类。
-- **Tomcat.py**: 实现与 Tomcat 服务器的连接和请求处理。
-- **TomcatScan.py**: 主程序逻辑，负责加载配置、初始化资源并启动漏洞检测流程。
+- **common/common.py**: 提供通用工具函数。
 - **config.yaml**: 配置文件，包含线程池、重试机制、CNVD-2020-10487 漏洞检测等配置信息。
+- **README.md**: 项目的使用说明文档。
+- **model/Tomcat/constants.py**: 定义常量，用于AJP请求的准备。
+- **model/Tomcat/Tomcat.py**: 实现与 Tomcat 服务器的连接和请求处理。
+- **model/AjpBodyRequest.py**: 处理 AJP Body 请求的序列化和发送。
+- **model/AjpForwardRequest.py**: 处理 AJP Forward 请求的创建、序列化和解析。
+- **model/AjpResponse.py**: 解析 AJP 响应数据。
+- **model/NotFoundException.py**: 自定义异常类。
+- **TomcatScan.py**: 主程序逻辑，负责加载配置、初始化资源并启动漏洞检测流程。
+
 
 ## 主要功能
 
@@ -143,7 +144,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(messages')
 
 ---
 
-## 其他功能:
+## 其他功能 and 作者语:
 1. 引入配置文件，使得调整参数更加灵活
 2. 增加处理登录时无法访问URL的情况，并在重试次数达到顶点时(默认3次)将URL从待检测列表中排除
 3. 在上传成功或失败后删除WAR文件与JSP文件，磁盘空间浪费
