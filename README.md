@@ -106,7 +106,7 @@ E:\python\Python_project\TomcatScan\
 3. 在`config.yaml`中配置文件路径和其他设置。
 4. 运行脚本，将会在`success.txt`文件中记录成功利用漏洞信息。
 
-```
+```bash
   python TomcatScanPro.py
 ```
 
