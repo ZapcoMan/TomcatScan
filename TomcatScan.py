@@ -337,6 +337,7 @@ def adjust_thread_pool_size(combination_count, max_workers_limit, min_workers, c
     返回:
         int: 调整后的线程池大小
     """
+    # 如果没有组合或者负数个组合，返回最小线程数
     if combination_count <= 0:
         return min_workers
     # 根据用户配置的每多少个组合分配一个线程，并确保至少有min_workers个线程
@@ -344,8 +345,10 @@ def adjust_thread_pool_size(combination_count, max_workers_limit, min_workers, c
 
     # 保证线程数不超过max_workers_limit
     workers = min(calculated_workers, max_workers_limit)
+    # 记录日志，说明根据组合数调整线程池大小
     logger.info(f"根据用户名和密码组合总数 {combination_count} 调整线程池大小为 {workers}")
     return workers
+
 
 
 def validate_config(config):
