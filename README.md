@@ -153,3 +153,4 @@ logging.basicConfig(level=logging.DEBUG, format='%(messages')
 7. 动态调整线程池大小:根据用户名和密码的组合队列计算调整线程池大小
 8. 使用的 tomcat版本为apache-tomcat-8.5.31 哥斯拉是最新版 [godzilla：https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla](https://github.com/BeichenDream/Godzilla/releases/tag/v4.0.1-godzilla)
 9. 项目中的字典过于简单 各位可以自行配置
+10. CNVD-2020-10487 和CVE-2020-1938 是同一个安全漏洞的不同命名
