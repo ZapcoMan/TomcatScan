@@ -57,7 +57,7 @@ E:\python\Python_project\TomcatScan\
 每个文件的主要功能如下：
 
 - **common/common.py**: 提供通用工具函数。
-- **config.yaml**: 配置文件，包含线程池、重试机制、CNVD-2020-10487 漏洞检测等配置信息。
+- **config.yaml**: 配置文件，包含线程池、重试机制、 CVE-2020-1938（CNVD-2020-10487）  漏洞检测等配置信息。
 - **README.md**: 项目的使用说明文档。
 - **model/Tomcat/constants.py**: 定义常量，用于AJP请求的准备。
 - **model/Tomcat/Tomcat.py**: 实现与 Tomcat 服务器的连接和请求处理。
