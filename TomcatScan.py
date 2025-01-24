@@ -13,7 +13,7 @@ import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
-
+from pocs.CVE_2024_50379 import check_cve_2024_50739
 import requests
 import urllib3
 import yaml
@@ -507,19 +507,19 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
             f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
     # 添加新的漏洞 poc
     # 检测新的CVE-2021-12345漏洞
-    success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
+    success, vuln_type, exploit_url = check_cve_2024_50739(url, config)
     if success:
         target_host = url.split("://")[-1].split("/")[0]
         with open(output_file, 'a', encoding='utf-8') as f:
             f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
 
     # 无论漏洞利用成功与否，都进行弱口令检测
-    logger.info(f"{Fore.GREEN}[+] 接下来进行弱口令检测.........")
-    check_weak_password(url, usernames, passwords, output_file,
-                        config['retry']['check_weak_password']['max_retries'],
-                        config['retry']['check_weak_password']['retry_delay'],
-                        config,
-                        proxies)
+    # logger.info(f"{Fore.GREEN}[+] 接下来进行弱口令检测.........")
+    # check_weak_password(url, usernames, passwords, output_file,
+    #                     config['retry']['check_weak_password']['max_retries'],
+    #                     config['retry']['check_weak_password']['retry_delay'],
+    #                     config,
+    #                     proxies)
 
 
 # 主函数
