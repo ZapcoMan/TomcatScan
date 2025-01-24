@@ -45,6 +45,8 @@ E:\python\Python_project\TomcatScan\
 ├── Tomcat\
 │   ├── constants.py
 │   └── Tomcat.py
+├── pocs\
+│   └── CVE_2024_50379.py
 ├── AjpBodyRequest.py
 ├── AjpForwardRequest.py
 ├── AjpResponse.py
@@ -100,7 +102,9 @@ E:\python\Python_project\TomcatScan\
 - 在弱口令破解成功后，工具会尝试通过 Tomcat 管理后台上传 `WAR` 包，以获取远程代码执行权限。
 - 部署的 `WAR` 包会自动在服务器上解压并生成 JSP Shell 文件，访问该文件后便可以获取 Shell 权限。
 - 支持通过配置文件自定义` Shell  `文件的内容。
-
+### 4. **Apache-Tomcat条件竞争致远程代码执行漏洞(CVE-2024-50379) **
+- 利用条件竞争致远程代码执行漏洞(CVE-2024-50379)
+- 利用成功后 windows 电脑 会打开 计算器 或者访问地址 也会打开 计算器 
 ## 使用方法
 
 1. 准备包含URL、用户名和密码的文本文件，分别命名为`urls.txt`、`user.txt`和`passwd.txt`。
