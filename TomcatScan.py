@@ -497,14 +497,14 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
     - proxies: 代理设置，格式为 {'http': 'http://10.10.1.10:3128', 'https': 'http://10.10.1.10:1080'}
     """
 
-    # 检测特定CVE和CNVD漏洞
-    success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
-
-    # 如果漏洞利用成功，则将结果追加到输出文件
-    if success:
-        target_host = url.split("://")[-1].split("/")[0]
-        with open(output_file, 'a', encoding='utf-8') as f:
-            f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
+    # # 检测特定CVE和CNVD漏洞
+    # success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
+    #
+    # # 如果漏洞利用成功，则将结果追加到输出文件
+    # if success:
+    #     target_host = url.split("://")[-1].split("/")[0]
+    #     with open(output_file, 'a', encoding='utf-8') as f:
+    #         f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
     # 添加新的漏洞 poc
     # 检测新的CVE-2021-12345漏洞
     success, vuln_type, exploit_url = check_cve_2024_50739(url, config)

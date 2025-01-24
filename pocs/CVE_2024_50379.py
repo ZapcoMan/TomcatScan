@@ -26,12 +26,9 @@ def read_file(file_path):
 def check_cve_2024_50739(url, config):
     protocols = ['http://', 'https://']
     found_vulnerabilities = False
-    parsed_url = urlparse(url)
-    # 自动去掉端口号
-    target_host = parsed_url.hostname
-    # 从配置文件中读取 Tomcat 的 AJP 端口、文件路径和判断条件
-    target_port = config['CVE-2024-50379']['port']
+
     for protocol in protocols:
+        # 构建目标URL，确保URL以协议开头，去除前导的'http://'或'https://'，并以斜杠结尾
         target_url = urljoin(protocol + url.lstrip('http://').lstrip('https://'), "/")
         logging.info(f"Checking {target_url}...")
 
@@ -74,7 +71,11 @@ def check_cve_2024_50739(url, config):
             except Exception as e:
                 logging.warning(f"Error occurred: {e}")
                 return False, None, None
-
+        parsed_url = urlparse(url)
+        # 自动去掉端口号
+        target_host = parsed_url.hostname
+        # 从配置文件中读取 Tomcat 的 AJP 端口、文件路径和判断条件
+        target_port = config['CVE-2024-50379']['port']
         if found_vulnerabilities:
             logging.info(f"\033[31mFind: {url}: Apache Tomcat CVE-2024-50379 Conditional Competition To RCE!\033[0m")
             return True, "ApachTomcat_CVE-2024-50379", f"http://{target_host}:{target_port}/aa.Jsp"
