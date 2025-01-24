@@ -505,6 +505,13 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
         target_host = url.split("://")[-1].split("/")[0]
         with open(output_file, 'a', encoding='utf-8') as f:
             f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
+    # 添加新的漏洞 poc
+    # 检测新的CVE-2021-12345漏洞
+    success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
+    if success:
+        target_host = url.split("://")[-1].split("/")[0]
+        with open(output_file, 'a', encoding='utf-8') as f:
+            f.write(f"{target_host} - {vuln_type} Exploited: {exploit_url}\n")
 
     # 无论漏洞利用成功与否，都进行弱口令检测
     logger.info(f"{Fore.GREEN}[+] 接下来进行弱口令检测.........")
