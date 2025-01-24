@@ -108,10 +108,10 @@ E:\python\Python_project\TomcatScan\
 - 利用条件竞争致远程代码执行漏洞(CVE-2024-50379)
 - 利用成功后 windows 电脑 会打开 计算器 或者访问地址 也会打开 计算器
 - 代码中注释的部分 是 打开计算器，现在 则是可以直接将木马种进去 和 CNVD-2020-10487 (AJP 协议本地文件包含漏洞) 一样 是 哥斯拉的 jsp 木马文件
-- 影响版本:
-  —Apache Tomcat 11.0.0-M1到11.0.1
-—Apache Tomcat 10.1.1.0 - m1到10.1.33
-—Apache Tomcat 9.0.0。M1到9.0.97
+  - 影响版本:
+  - Apache Tomcat 11.0.0-M1到11.0.1
+  - Apache Tomcat 10.1.1.0 - m1到10.1.33
+  - Apache Tomcat 9.0.0。M1到9.0.97
 ## 使用方法
 
 1. 准备包含URL、用户名和密码的文本文件，分别命名为`urls.txt`、`user.txt`和`passwd.txt`。
