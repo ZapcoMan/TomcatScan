@@ -65,6 +65,7 @@ E:\python\Python_project\TomcatScan\
 - **model/AjpForwardRequest.py**: 处理 AJP Forward 请求的创建、序列化和解析。
 - **model/AjpResponse.py**: 解析 AJP 响应数据。
 - **model/NotFoundException.py**: 自定义异常类。
+- **poc/CVE_2024_50379.py**: CVE_2024_50379 POC EXP 脚本
 - **TomcatScan.py**: 主程序逻辑，负责加载配置、初始化资源并启动漏洞检测流程。
 
 
