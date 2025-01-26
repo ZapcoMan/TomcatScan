@@ -498,9 +498,9 @@ def detect_and_check(url, usernames, passwords, output_file, config, proxies):
     """
 
     #  检测特定CVE和CNVD漏洞
-    success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
 
     # 如果漏洞利用成功，则将结果追加到输出文件
+    success, vuln_type, exploit_url = check_cve_2017_12615_and_cnvd_2020_10487(url, config)
     if success:
         target_host = url.split("://")[-1].split("/")[0]
         with open(output_file, 'a', encoding='utf-8') as f:
